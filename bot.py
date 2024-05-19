@@ -151,6 +151,8 @@ def solved_today(username, title_slug):
         recentAcSubmissionList(username: $username, limit: 20) {
             titleSlug
             timestamp
+            runtime
+            memory
         }
     }
     """
@@ -179,7 +181,11 @@ def solved_today(username, title_slug):
     array = data['data']['recentAcSubmissionList']
     last_solved = [x for x in array if int(x.get('timestamp')) > timestamp]
     
-    return any(d['titleSlug'] == title_slug for d in last_solved), len(last_solved) > 0
+    for d in last_solved:
+        if d['titleSlug'] == title_slug:
+            return True, True, d['runtime'], d['memory']
+    
+    return len(last_solved) > 0, False, None, None
 
 
 @bot.message_handler(commands=['status'])
@@ -195,8 +201,11 @@ def send_today(message):
             for future in as_completed(future_to_username):
                 username = future_to_username[future]
                 try:
-                    solved, another = future.result()
-                    answer += f'{"✅" if solved else ("☑️" if another else "⬜️")}\t{username}\n'
+                    another, solved, runtime, memory = future.result()
+                    if solved:
+                        answer += f'✅\t{username}, {runtime}, {memory}\n'
+                    else:
+                        answer += f'{"☑️" if another else "⬜️"}\t{username}\n'
                 except Exception as exc:
                     answer += f'⛔️\t{username}\n'
         
