@@ -1,13 +1,16 @@
 import os
-import telebot
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import pytz
 
+import asyncio
+from telebot.async_telebot import AsyncTeleBot
+
+
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = AsyncTeleBot(BOT_TOKEN)
 
 usernames = ['sivykh', 'dfomin', 'grafnick', 'gregzhadko', 'kulizhnikov', 'drunstep', 'ptatarintsev', 'dmitryae']
 
@@ -48,7 +51,7 @@ def get_leetcode_user_rank(username):
     return ranking
 
 
-def get_ranks_for_users(usernames):
+async def get_ranks_for_users(usernames):
     user_ranks = {}
     with ThreadPoolExecutor(max_workers=len(usernames)) as executor:
         future_to_username = {executor.submit(get_leetcode_user_rank, username): username for username in usernames}
@@ -62,17 +65,18 @@ def get_ranks_for_users(usernames):
                 user_ranks[username] = str(e)
 
     return user_ranks
+
     
 
 @bot.message_handler(commands=['start', 'rank'])
-def send_rank(message):
-    user_ranks = get_ranks_for_users(usernames)
+async def send_rank(message):
+    user_ranks = await get_ranks_for_users(usernames)
     sorted_users = sorted(user_ranks.items(), key=lambda item: item[1])
     answer = '```Standings\n'
     for user in sorted_users:
         answer += f'{user[0]}\t{user[1]}\n'
     answer += '```'
-    bot.reply_to(message, answer, parse_mode="Markdown")
+    await bot.reply_to(message, answer, parse_mode="Markdown")
 
 
 ########################## TODAY COMMAND ##########################
@@ -127,7 +131,7 @@ def get_leetcode_daily_challenge():
 
 
 @bot.message_handler(commands=['today'])
-def send_today(message):
+async def send_today(message):
     try:
         daily_challenge = get_leetcode_daily_challenge()
         question = daily_challenge['question']
@@ -137,9 +141,9 @@ def send_today(message):
         answer += f"*Link*: https://leetcode.com{daily_challenge['link']}\n"
         answer += f"*Acceptance Rate*: {question['acRate']:.2f}%\n"
         
-        bot.reply_to(message, answer, parse_mode="Markdown")
+        await bot.reply_to(message, answer, parse_mode="Markdown")
     except Exception as e:
-        bot.reply_to(message, f"Не получилось\n{str(e)}", parse_mode="Markdown")
+        await bot.reply_to(message, f"Error occured\n{str(e)}", parse_mode="Markdown")
 
 
 ########################## STATUS COMMAND ##########################
@@ -189,7 +193,7 @@ def solved_today(username, title_slug):
 
 
 @bot.message_handler(commands=['status'])
-def send_today(message):
+async def send_today(message):
     try:
         daily_challenge = get_leetcode_daily_challenge()
         question = daily_challenge['question']
@@ -209,12 +213,12 @@ def send_today(message):
                 except Exception as exc:
                     answer += f'⛔️\t{username}\n'
         
-        bot.reply_to(message, answer, parse_mode="Markdown")
+        await bot.reply_to(message, answer, parse_mode="Markdown")
     except Exception as e:
-        bot.reply_to(message, f"Не получилось\n{str(e)}", parse_mode="Markdown")
+        await bot.reply_to(message, f"Error occured\n{str(e)}", parse_mode="Markdown")
 
 
 ########################## MAIN ##########################
 
 if __name__ == "__main__":
-    bot.infinity_polling()
+    asyncio.run(bot.polling())
