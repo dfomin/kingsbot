@@ -14,6 +14,32 @@ bot = AsyncTeleBot(BOT_TOKEN)
 
 usernames = ['sivykh', 'dfomin', 'grafnick', 'gregzhadko', 'kulizhnikov', 'drunstep', 'ptatarintsev', 'dmitryae']
 
+########################## AWS LAMBDA ##########################
+def lambda_handler(event, context):
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(lambda_handler(event, context))
+    
+
+async def lambda_handler(event, context):
+    if not 'message' in event:
+        return { 'statusCode': 500, 'body': 'No message' }
+
+    message_json = event.get('message')
+    message = telebot.types.Message.de_json(message_json)
+    text = message_json.get('text', '/start')
+    
+    match text:
+        case '/start', '/rank':
+            await send_rank(message)
+        case '/today':
+            await send_today(message)
+        case '/status':
+            await send_status(message)
+        case _:
+            return { 'statusCode': 500, 'body': 'Unsupported command' }
+    
+    return { 'statusCode': 200 }
+    
 
 ########################## RANK COMMAND ##########################
 
@@ -193,7 +219,7 @@ def solved_today(username, title_slug):
 
 
 @bot.message_handler(commands=['status'])
-async def send_today(message):
+async def send_status(message):
     try:
         daily_challenge = get_leetcode_daily_challenge()
         question = daily_challenge['question']
