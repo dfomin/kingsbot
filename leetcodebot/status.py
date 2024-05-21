@@ -72,7 +72,6 @@ async def send_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 try:
                     another, solved, runtime, memory, submission_id = future.result()
                     if solved:
-                        # https://leetcode.com/problems/subsets/submissions/1263763643
                         link = f"https://leetcode.com/problems/{question["titleSlug"]}/submissions/{submission_id}/"
                         answers[username] = f"✅\t{username}, [{runtime}, {memory}]({link})\n"
                     else:
