@@ -2,10 +2,8 @@ import os
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-import pytz
 
 import asyncio
-from telebot.async_telebot import AsyncTeleBot
 
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
