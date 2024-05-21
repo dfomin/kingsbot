@@ -1,7 +1,6 @@
 import os
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import pytz
 
@@ -12,15 +11,15 @@ from telebot.async_telebot import AsyncTeleBot
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = AsyncTeleBot(BOT_TOKEN)
 
-usernames = ['sivykh', 'dfomin', 'grafnick', 'gregzhadko', 'kulizhnikov', 'drunstep', 'ptatarintsev', 'dmitryae']
+usernames = ['sivykh', 'dfomin', 'grafnick', 'gregzhadko', 'kulizhnikov', 'drunstep', 'ptatarintsev', 'dmitryae', 'cpcs']
 
 ########################## AWS LAMBDA ##########################
 def lambda_handler(event, context):
     loop = asyncio.get_event_loop()
-    return loop.run_until_complete(lambda_handler(event, context))
+    return loop.run_until_complete(async_lambda_handler(event, context))
     
 
-async def lambda_handler(event, context):
+async def async_lambda_handler(event, context):
     if not 'message' in event:
         return { 'statusCode': 500, 'body': 'No message' }
 
@@ -29,7 +28,7 @@ async def lambda_handler(event, context):
     text = message_json.get('text', '/start')
     
     match text:
-        case '/start', '/rank':
+        case '/start' | '/rank':
             await send_rank(message)
         case '/today':
             await send_today(message)
@@ -49,7 +48,7 @@ def get_leetcode_user_rank(username):
     query getUserProfile($username: String!) {
         matchedUser(username: $username) {
             profile {
-                ranking
+              ranking
             }
         }
     }
@@ -69,6 +68,8 @@ def get_leetcode_user_rank(username):
     data = response.json()
     if 'errors' in data:
         raise Exception(f"Error fetching data for user {username}: {data['errors']}")
+        
+#    print(data['data'])
     
     ranking = data['data']['matchedUser']['profile']['ranking']
     
@@ -179,6 +180,7 @@ def solved_today(username, title_slug):
     query = """
     query recentAcSubmissions($username: String!) {
         recentAcSubmissionList(username: $username, limit: 20) {
+            id
             titleSlug
             timestamp
             runtime
@@ -213,9 +215,9 @@ def solved_today(username, title_slug):
     
     for d in last_solved:
         if d['titleSlug'] == title_slug:
-            return True, True, d['runtime'], d['memory']
+            return True, True, d['runtime'], d['memory'], d['id']
     
-    return len(last_solved) > 0, False, None, None
+    return len(last_solved) > 0, False, None, None, None
 
 
 @bot.message_handler(commands=['status'])
@@ -223,7 +225,7 @@ async def send_status(message):
     try:
         daily_challenge = get_leetcode_daily_challenge()
         question = daily_challenge['question']
-        answer = ""
+        answers = {}
         
         with ThreadPoolExecutor(max_workers=len(usernames)) as executor:
             future_to_username = {executor.submit(solved_today, username, question['titleSlug']): username for username in usernames}
@@ -231,13 +233,19 @@ async def send_status(message):
             for future in as_completed(future_to_username):
                 username = future_to_username[future]
                 try:
-                    another, solved, runtime, memory = future.result()
+                    another, solved, runtime, memory, submission_id = future.result()
                     if solved:
-                        answer += f'✅\t{username}, {runtime}, {memory}\n'
+                        link = f'https://leetcode.com/submissions/detail/{submission_id}/'
+                        answers[username] = f'✅\t{username}, [{runtime}, {memory}]({link})\n'
                     else:
-                        answer += f'{"☑️" if another else "⬜️"}\t{username}\n'
+                        answers[username] = f'{"☑️" if another else "⬜️"}\t{username}\n'
                 except Exception as exc:
-                    answer += f'⛔️\t{username}\n'
+                    answers[username] = f'⛔️\t{username}\n'
+        
+        sorted_info = sorted(answers.items(), key=lambda item: item[0])
+        answer = ''
+        for info in sorted_info:
+            answer += f'{info[1]}'
         
         await bot.reply_to(message, answer, parse_mode="Markdown")
     except Exception as e:
