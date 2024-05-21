@@ -4,8 +4,11 @@ import logging
 import os
 
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler
 
+from leetcodebot.rank import send_rank
+from leetcodebot.today import send_today
+from leetcodebot.status import send_status
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,17 +17,13 @@ logger = logging.getLogger(__name__)
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 
-async def today_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    print("today")
-    """Send a message when the command /help is issued."""
-    await update.message.reply_text("TODAY!")
-
-
 def create_application() -> Application:
     """Create an Application for handling updates."""
     app = Application.builder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler("today", today_command))
+    app.add_handler(CommandHandler("rank", send_rank))
+    app.add_handler(CommandHandler("today", send_today))
+    app.add_handler(CommandHandler("status", send_status))
 
     return app
 
@@ -40,8 +39,8 @@ async def process_update(event_body):
 
 
 def lambda_handler(event, context):
-    print(event)
     """Lambda function handler for processing Telegram updates."""
+    print(event)
     try:
         event_body = event.get("body")
         print(event_body)
@@ -49,3 +48,7 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"Error processing update: {e}")
     return {"statusCode": 200}
+
+
+if __name__ == '__main__':
+    application.run_polling()
