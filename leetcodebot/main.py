@@ -40,10 +40,8 @@ async def process_update(event_body):
 
 def lambda_handler(event, context):
     """Lambda function handler for processing Telegram updates."""
-    print(event)
     try:
         event_body = event.get("body")
-        print(event_body)
         asyncio.run(process_update(event_body))
     except Exception as e:
         logger.error(f"Error processing update: {e}")

@@ -1,3 +1,5 @@
+from typing import Dict, Any
+
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
@@ -5,7 +7,7 @@ from telegram.constants import ParseMode
 import requests
 
 
-def get_leetcode_daily_challenge():
+def get_leetcode_daily_challenge() -> Dict[str, Any]:
     url = "https://leetcode.com/graphql"
     query = """
     query questionOfToday {

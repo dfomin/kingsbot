@@ -1,4 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List
+
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
@@ -8,7 +10,7 @@ import requests
 from leetcodebot.consts import hardcode_usernames
 
 
-def get_leetcode_user_rank(username):
+def get_leetcode_user_rank(username) -> str:
     url = "https://leetcode.com/graphql"
     query = """
     query getUserProfile($username: String!) {
@@ -42,7 +44,7 @@ def get_leetcode_user_rank(username):
     return ranking
 
 
-async def get_ranks_for_users(usernames: list[str]) -> None:
+async def get_ranks_for_users(usernames: List[str]) -> Dict[str, str]:
     user_ranks = {}
     with ThreadPoolExecutor(max_workers=len(usernames)) as executor:
         future_to_username = {executor.submit(get_leetcode_user_rank, username): username for username in usernames}

@@ -1,3 +1,5 @@
+from typing import Tuple, Optional
+
 import requests
 
 from datetime import datetime, timezone
@@ -10,7 +12,7 @@ from leetcodebot.consts import hardcode_usernames
 from leetcodebot.today import get_leetcode_daily_challenge
 
 
-def solved_today(username: str, title_slug: str) -> [bool, bool, str, str, str]:
+def solved_today(username: str, title_slug: str) -> Tuple[bool, bool, Optional[str], Optional[str], Optional[str]]:
     url = "https://leetcode.com/graphql"
     query = """
     query recentAcSubmissions($username: String!) {
