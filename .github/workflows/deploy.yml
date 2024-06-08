@@ -32,9 +32,8 @@ jobs:
       with:
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         aws-region: eu-west-1
-      env:
-          ACTIONS_RUNNER_DEBUG: true
-          ACTIONS_STEP_DEBUG: true
+      permissions:
+        id-token: write
 
     - name: Debug AWS Credentials
       run: aws sts get-caller-identity
