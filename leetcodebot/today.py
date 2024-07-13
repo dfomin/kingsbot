@@ -65,6 +65,6 @@ async def send_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         answer += f"*Difficulty*: `{question["difficulty"]}`\n"
         answer += f"*Link*: https://leetcode.com{daily_challenge["link"]}\n"
         answer += f"*Acceptance Rate*: {question["acRate"]:.2f}%\n"
-        await update.message.reply_text(answer, parse_mode=ParseMode.MARKDOWN)
+        await update.message.reply_text(answer, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
     except Exception as e:
         await update.message.reply_text(f"Error occurred\n{str(e)}", parse_mode=ParseMode.MARKDOWN)
