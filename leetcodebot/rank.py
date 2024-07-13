@@ -1,3 +1,4 @@
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List
 
@@ -7,7 +8,8 @@ from telegram.constants import ParseMode
 
 import requests
 
-from leetcodebot.consts import hardcode_usernames
+
+usernames = [name.strip() for name in os.getenv("USERNAMES", default="").split(",")]
 
 
 def get_leetcode_user_rank(username) -> str:
@@ -61,7 +63,7 @@ async def get_ranks_for_users(usernames: List[str]) -> Dict[str, str]:
 
 
 async def send_rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_ranks = await get_ranks_for_users(hardcode_usernames)
+    user_ranks = await get_ranks_for_users(usernames)
     sorted_users = sorted(user_ranks.items(), key=lambda item: item[1])
     answer = "```Standings\n"
     for user in sorted_users:

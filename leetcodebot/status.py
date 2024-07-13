@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Optional
 
 import requests
@@ -8,8 +9,10 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from leetcodebot.consts import hardcode_usernames
 from leetcodebot.today import get_leetcode_daily_challenge
+
+
+usernames = [name.strip() for name in os.getenv("USERNAMES", default="").split(",")]
 
 
 def solved_today(username: str, title_slug: str) -> Tuple[bool, bool, Optional[str], Optional[str], Optional[str]]:
@@ -63,10 +66,10 @@ async def send_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         question = daily_challenge["question"]
         answers = {}
 
-        with ThreadPoolExecutor(max_workers=len(hardcode_usernames)) as executor:
+        with ThreadPoolExecutor(max_workers=len(usernames)) as executor:
             future_to_username = {
                 executor.submit(solved_today, username, question["titleSlug"]): username
-                for username in hardcode_usernames
+                for username in usernames
             }
 
             for future in as_completed(future_to_username):
@@ -78,7 +81,7 @@ async def send_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                         answers[username] = f"✅\t{username}, [{runtime}, {memory}]({link})\n"
                     else:
                         answers[username] = f"{"☑️" if another else "⬜️"}\t{username}\n"
-                except Exception as exc:
+                except Exception:
                     answers[username] = f"⛔️\t{username}\n"
 
         sorted_info = sorted(answers.items(), key=lambda item: item[0])

@@ -28,6 +28,8 @@ jobs:
         pip install -r requirements.txt -t .
 
     - name: Package Lambda function
+      env:
+        USERNAMES: ${{ secrets.USERNAMES }}
       run: |
         zip -r function.zip .
 
@@ -36,9 +38,6 @@ jobs:
       with:
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         aws-region: eu-west-1
-
-    - name: Debug AWS Credentials
-      run: aws sts get-caller-identity
 
     - name: Deploy Lambda function
       run: |
