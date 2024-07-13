@@ -28,8 +28,6 @@ jobs:
         pip install -r requirements.txt -t .
 
     - name: Package Lambda function
-      env:
-        USERNAMES: ${{ secrets.USERNAMES }}
       run: |
         zip -r function.zip .
 
@@ -40,5 +38,9 @@ jobs:
         aws-region: eu-west-1
 
     - name: Deploy Lambda function
+      env:
+        USERNAMES: ${{ secrets.USERNAMES }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       run: |
         aws lambda update-function-code --function-name bot --zip-file fileb://function.zip
+        aws lambda update-function-configuration --function-name bot --environment "Variables={USERNAMES=$USERNAMES, TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN}"
