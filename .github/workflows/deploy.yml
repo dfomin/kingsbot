@@ -43,4 +43,4 @@ jobs:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       run: |
         aws lambda update-function-code --function-name bot --zip-file fileb://function.zip
-        aws lambda update-function-configuration --function-name bot --environment \"{\"Variables\":{\"USERNAMES\": \"$USERNAMES\", \"TELEGRAM_BOT_TOKEN\": \"$TELEGRAM_BOT_TOKEN\"}\}"
+        aws lambda update-function-configuration --function-name bot --environment \"{\"Variables\":{\"USERNAMES\": \"$USERNAMES\", \"TELEGRAM_BOT_TOKEN\": \"$TELEGRAM_BOT_TOKEN\"}}\"
