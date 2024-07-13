@@ -40,4 +40,4 @@ jobs:
     - name: Deploy Lambda function
       run: |
         aws lambda update-function-code --function-name bot --zip-file fileb://function.zip
-        aws lambda update-function-configuration --function-name bot --environment Variables={USERNAMES='${{ secrets.USERNAMES }}',TELEGRAM_BOT_TOKEN='${{ secrets.TELEGRAM_BOT_TOKEN }}'}
+        aws lambda update-function-configuration --function-name bot --environment "Variables={USERNAMES='${{ secrets.USERNAMES }}',TELEGRAM_BOT_TOKEN='${{ secrets.TELEGRAM_BOT_TOKEN }}'}"
