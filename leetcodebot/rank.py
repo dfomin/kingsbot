@@ -12,7 +12,7 @@ import requests
 usernames = [name.strip() for name in os.getenv("USERNAMES", default="").split(",")]
 
 
-def get_leetcode_user_rank(username: str) -> str:
+def get_leetcode_user_rank(username: str) -> int:
     url = "https://leetcode.com/graphql"
     query = """
     query getUserProfile($username: String!) {
@@ -42,7 +42,7 @@ def get_leetcode_user_rank(username: str) -> str:
     ranking = data["data"]["matchedUser"]["profile"]["ranking"]
 
     if ranking is None:
-        return "Unranked"
+        return 1_000_000_000
     return ranking
 
 

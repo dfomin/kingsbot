@@ -10,7 +10,7 @@ from telegram.constants import ParseMode
 usernames = [name.strip() for name in os.getenv("USERNAMES", default="").split(",")]
 
 
-def get_leetcode_contest_rank(username: str) -> str:
+def get_leetcode_contest_rank(username: str) -> int:
     url = "https://leetcode.com/graphql"
     query = """
     query getContestInfo($username: String!) {
@@ -38,7 +38,7 @@ def get_leetcode_contest_rank(username: str) -> str:
     ranking = data["data"]["userContestRanking"]["globalRanking"]
 
     if ranking is None:
-        return "Unranked"
+        return 1_000_000_000
     return ranking
 
 
