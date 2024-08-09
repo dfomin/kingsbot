@@ -35,10 +35,11 @@ def get_leetcode_contest_rank(username: str) -> int:
     if "errors" in data:
         raise Exception(f"Error fetching data for user {username}: {data["errors"]}")
 
-    ranking = data["data"]["userContestRanking"]["globalRanking"]
+    try:
+        ranking = data["data"]["userContestRanking"]["globalRanking"]
+    except TypeError:
+        ranking = 1_000_000_000
 
-    if ranking is None:
-        return 1_000_000_000
     return ranking
 
 
