@@ -10,8 +10,8 @@ from telegram.ext import ContextTypes
 users_by_id = {
     name.split(":")[0]: name.split(":")[1] for name in os.getenv("AOC_USER_IDS", default=":").split(",")
 }
-token: str = os.getenv("AOC_TOKEN")
-leaderboard_id = os.getenv("AOC_LEADERBOARD")
+token: str = os.getenv("AOC_TOKEN", default="")
+leaderboard_id: str = os.getenv("AOC_LEADERBOARD", default="")
 
 
 @dataclass
