@@ -6,6 +6,7 @@ import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler
 
+from leetcodebot.aoc import send_aoc
 from leetcodebot.contest import send_contest
 from leetcodebot.rank import send_rank
 from leetcodebot.today import send_today
@@ -26,6 +27,7 @@ def create_application() -> Application:
     app.add_handler(CommandHandler("today", send_today))
     app.add_handler(CommandHandler("status", send_status))
     app.add_handler(CommandHandler("contest", send_contest))
+    app.add_handler(CommandHandler("aoc", send_aoc))
 
     return app
 
