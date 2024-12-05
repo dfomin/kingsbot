@@ -22,7 +22,7 @@ class AOCResult:
     current_day_solutions: int
 
 
-def get_leaderboard(year: int | None = None) -> list[AOCResult]:
+def get_leaderboard(year: int | None = None) -> tuple[int, list[AOCResult]]:
     today = datetime.now(tz=UTC) - timedelta(hours=5)
     year = year or today.year
     check_today = year == today.year and today.month == 12 and today.day < 26
@@ -55,13 +55,18 @@ def get_leaderboard(year: int | None = None) -> list[AOCResult]:
                 current_day_solutions=current_day_solutions
             )
         )
-    return sorted(results, key=lambda x: x.stars, reverse=True)
+    return year, sorted(results, key=lambda x: x.stars, reverse=True)
 
 
 async def send_aoc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
-        leaderboard = get_leaderboard()
-        answer = ""
+        year: int | None = None
+        command_parts = update.message.text.split(' ')
+        if len(command_parts) > 1 and command_parts[1].isnumeric():
+            year = int(command_parts[1])
+
+        leaderboard_year, leaderboard = get_leaderboard(year=year)
+        answer = f"🌟 Leaderboard for Advent of Code {leaderboard_year} 🌟\n\n"
         nice: list[str] = []
         excellent: list[str] = []
         for user_info in leaderboard:
@@ -77,7 +82,6 @@ async def send_aoc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if len(excellent) > 0:
             answer += f"\nКрасавчики дня: {", ".join(excellent)}."
         await update.message.reply_text(answer, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-
     except Exception as e:
         await update.message.reply_text(f"Error occurred\n{str(e)}", parse_mode=ParseMode.MARKDOWN)
 
