@@ -43,4 +43,4 @@ jobs:
 
     - name: Update Lambda environment variables
       run: |
-        aws lambda update-function-configuration --function-name bot --environment "Variables={USERNAMES='${{ secrets.USERNAMES }}',TELEGRAM_BOT_TOKEN='${{ secrets.TELEGRAM_BOT_TOKEN }}'}"
+        aws lambda update-function-configuration --function-name bot --environment "Variables={USERNAMES='${{ secrets.USERNAMES }}',TELEGRAM_BOT_TOKEN='${{ secrets.TELEGRAM_BOT_TOKEN }}',AOC_TOKEN='${{ secrets.AOC_TOKEN }}',AOC_LEADERBOARD='${{ secrets.AOC_LEADERBOARD }}',AOC_USER_IDS='${{ secrets.AOC_USER_IDS }}'}"
