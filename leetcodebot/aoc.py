@@ -84,4 +84,3 @@ async def send_aoc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(answer, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
     except Exception as e:
         await update.message.reply_text(f"Error occurred\n{str(e)}", parse_mode=ParseMode.MARKDOWN)
-
