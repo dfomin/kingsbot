@@ -24,7 +24,11 @@ class AOCResult:
 
 def get_leaderboard(year: int | None = None) -> tuple[int, list[AOCResult]]:
     today = datetime.now(tz=UTC) - timedelta(hours=5)
-    year = year or today.year
+    if not year:
+        if today.month == 12:
+            year = today.year
+        else:
+            year = today.year - 1
     check_today = year == today.year and today.month == 12 and today.day < 26
 
     if len(token) == 0 or len(leaderboard_id) == 0:
